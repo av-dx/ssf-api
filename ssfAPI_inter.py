@@ -1,10 +1,6 @@
-import os
-import sys
-import codecs
 import re
-import locale
 
-# sys.stdout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
+__version__ = '1.0'
 
 
 class Coreference_entity():
@@ -66,7 +62,7 @@ class Node():
         self.tamWx = None
 
         self.analyzeNode(self.text)
-        if self.getAttribute('af') != None:
+        if self.getAttribute('af') is not None:
             aa = self.getAttribute('af').strip().split(',')
             self.morphroot = aa[0]
             self.morphPOS = aa[1]
@@ -83,7 +79,7 @@ class Node():
         attributeUpdateStatus = self.updateAttributes(
             token, tokenType, fsDict, fsList)
         acrefMod = self.getAttribute('acrefMod')
-        if acrefMod != None:
+        if acrefMod is not None:
             acrefModtemp = acrefMod.split(',')
             for i in acrefModtemp:
                 uniqid = i.split(':')[1]
@@ -101,16 +97,16 @@ class Node():
 
                 unique.lines.append(self.linenumber)
                 unique.nodes.append(self)
-                unique.wordwithpos.append(self.lex+'_'+self.type)
-                unique.crefmodtext = unique.crefmodtext+self.lex+' '
+                unique.wordwithpos.append(self.lex + '_' + self.type)
+                unique.crefmodtext = unique.crefmodtext + self.lex + ' '
 
-                if unique.modestartline == None:
+                if unique.modestartline is None:
                     unique.modestartline = self.linenumber
                 if modeidpart.strip() == '1':
                     unique.modeendline = self.linenumber
 
         acrefModhead = self.getAttribute('acrefModHead')
-        if acrefModhead != None:
+        if acrefModhead is not None:
             acrefModheadtemp = acrefModhead.split(',')
             for i in acrefModheadtemp:
                 modeid = i.split(':')[1]
@@ -120,7 +116,7 @@ class Node():
                 unique.crefmodheadtext = modehead
 
         cref = self.getAttribute('cref')
-        if cref != None:
+        if cref is not None:
             creftemp = cref.split(',')
             for i in creftemp:
                 if i.strip() == '':
@@ -171,12 +167,12 @@ class Node():
                         unique.endlineno = self.linenumber
                 unique.lines.append(self.linenumber)
                 unique.nodes.append(self)
-                unique.wordwithpos.append(self.lex+'_'+self.type)
+                unique.wordwithpos.append(self.lex + '_' + self.type)
                 if uniqidpart.strip() == '1':
                     unique.endlineno = self.linenumber
 
         crefHead = self.getAttribute('crefHead')
-        if crefHead != None:
+        if crefHead is not None:
             listforentity = []
             crefHeadtemp = crefHead.split(',')
             for i in crefHeadtemp:
@@ -188,7 +184,7 @@ class Node():
                 unique.headnode = self
                 listforentity.append(unique)
             crefType = self.getAttribute('crefType')
-            if crefType != None:
+            if crefType is not None:
                 crefTypetemp = crefType.split(',')
                 for i in crefTypetemp:
                     ctype = i.split(':')[0]
@@ -199,7 +195,7 @@ class Node():
                     unique.parentrelation = ctype
 
         crefChainHead = self.getAttribute('crefChainHead')
-        if crefChainHead != None:
+        if crefChainHead is not None:
             crefChainHeadtemp = crefChainHead.split(',')
             for i in crefChainHeadtemp:
                 uniqid = i.split(':')[0]
@@ -287,7 +283,7 @@ class Node():
 
     def printSSFValue(self, prefix, allFeat):
         returnValue = [prefix, self.printValue(), self.type]
-        if allFeat == False:
+        if not allFeat:
             fs = ['<fs']
             for key in self.__attributes.keys():
                 fs.append(key + "='" + self.getAttribute(key) + "'")
@@ -386,7 +382,7 @@ class ChunkNode():
     def printSSFValue(self, prefix, allFeat):
         returnStringList = []
         returnValue = [prefix, '((', self.type]
-        if allFeat == False:
+        if not allFeat:
             fs = ['<fs']
             for key in self.__attributes.keys():
                 fs.append(key + "='" + self.getAttribute(key) + "'")
@@ -446,7 +442,7 @@ class Sentence():
         self.dummySentence = dummySentence
         self.dependencyRoot = None
         # self.linecount = 0
-        if self.dummySentence == False:
+        if not self.dummySentence:
             self.header = sentence.group('header')
             self.footer = sentence.group('footer')
             self.name = sentence.group('sentenceID')
@@ -464,7 +460,7 @@ class Sentence():
 
             if stripLine == "":
                 continue
-            elif stripLine[0] == "<" and ignoreErrors == False:
+            elif stripLine[0] == "<" and not ignoreErrors:
                 self.errors.append('Encountered a line starting with "<"')
                 self.probSent = True
             else:
@@ -473,7 +469,7 @@ class Sentence():
                     currentChunkNode.footer = line + '\n'
                     currentChunkNode.analyzeChunk()
 
-                    if currentChunkNode.getAttribute('af') != None:
+                    if currentChunkNode.getAttribute('af') is not None:
                         aa = currentChunkNode.getAttribute(
                             'af').strip().split(',')
                         if len(aa) >= 6:
@@ -503,9 +499,9 @@ class Sentence():
         for i in lastContext.nodeList:
             for j in i.nodeList:
                 drel = j.getAttribute('drel')
-                if drel == None:
+                if drel is None:
                     dmrel = j.getAttribute('dmrel')
-                    if dmrel == None:
+                    if dmrel is None:
                         j.parent = j
                         j.parentRelation = '0'
                         j.upper.upper.dependencyRoot = j
@@ -622,7 +618,7 @@ class Document():
 
     def analyzeDocument(self):
 
-        inputFD = codecs.open(self.fileName, 'r', encoding='UTF-8')
+        inputFD = open(self.fileName, 'r', encoding='utf-8')
         sentenceList = getSentenceIter(inputFD)
         for sentence in sentenceList:
             tree = Sentence(sentence, self, ignoreErrors=True,
@@ -664,9 +660,9 @@ def getAddressNode(address, node, level='ChunkNode'):
 def returnTokenList(nodeList):
     tokenList = []
     for nodeIter in nodeList:
-        if isinstance(nodeIter, ChunkNode) == True:
+        if isinstance(nodeIter, ChunkNode):
             tokenList.extend(returnTokenList(nodeIter.nodeList))
-        elif isinstance(nodeIter, Node) == True:
+        elif isinstance(nodeIter, Node):
             tokenList.append(nodeIter)
     return tokenList
 
@@ -674,7 +670,7 @@ def returnTokenList(nodeList):
 def returnChunkList(nodeList):
     tokenList = []
     for nodeIter in nodeList:
-        if isinstance(nodeIter, ChunkNode) == True:
+        if isinstance(nodeIter, ChunkNode):
             tokenList.append(nodeIter)
             tokenList.extend(returnChunkList(nodeIter.nodeList))
     return tokenList
