@@ -76,7 +76,7 @@ class Node_vandan():
             self.tamUtf = aa[6]
             self.tamWx = aa[7]
 
-    def analyzeNode(self, text):
+    def analyzeNode(self, text: str) -> None:
         [token, tokenType, fsDict, fsList] = getTokenFeats(
             text.strip().split())
         attributeUpdateStatus = self.updateAttributes(
@@ -210,55 +210,55 @@ class Node_vandan():
             self.errors.append("Can't update attributes for node")
             self.probSent = True
 
-    def checkforchainlist(self, commingList, chainid):
+    def checkforchainlist(self, commingList: list[Coreference_chain], chainid: int) -> bool:
         for i in commingList:
             if i.chainid == chainid:
                 return True
         return False
 
-    def getchainfromchainlist(self, commingList, chainid):
+    def getchainfromchainlist(self, commingList: list[Coreference_chain], chainid: int) -> int | None:
         for i in commingList:
             if i.chainid == chainid:
                 return i
         return None
 
-    def checkmodeinmodelistbymode(self, commingList, modeid):
+    def checkmodeinmodelistbymode(self, commingList: list[Coreference_entity], modeid: int) -> bool:
         for i in commingList:
             if i.modeid == modeid:
                 return True
         return False
 
-    def getmodeinmodelistbymode(self, commingList, modeid):
+    def getmodeinmodelistbymode(self, commingList: list[Coreference_entity], modeid: int) -> int | None:
         for i in commingList:
             if i.modeid == modeid:
                 return i
         return None
 
-    def checkuniqueEntityinmodelist(self, commingList, uniqueid):
+    def checkuniqueEntityinmodelist(self, commingList: list[Coreference_entity], uniqueid: int) -> bool:
         for i in commingList:
             if i.uniqueid == uniqueid:
                 return True
         return False
 
-    def getuniqueEntityinmodelist(self, commingList, uniqueid):
+    def getuniqueEntityinmodelist(self, commingList: list[Coreference_entity], uniqueid: int) -> bool:
         for i in commingList:
             if i.uniqueid == uniqueid:
                 return i
         return None
 
-    def checkforentityinchainlist(self, chain, uniqueid):
+    def checkforentityinchainlist(self, chain: Coreference_chain, uniqueid: int) -> bool:
         for i in chain.nodeList:
             if i.uniqueid == uniqueid:
                 return True
         return False
 
-    def getentityfromchainlist(self, chain, uniqueid):
+    def getentityfromchainlist(self, chain: Coreference_chain, uniqueid: int) -> bool:
         for i in chain.nodeList:
             if i.uniqueid == uniqueid:
                 return i
         return None
 
-    def getentity(self, chain, uniqueid):
+    def getentity(self, chain: list[Coreference_chain], uniqueid: int) -> bool:
         # print '\n',uniqueid
         for i in chain:
             for j in i.nodeList:
@@ -267,7 +267,7 @@ class Node_vandan():
                     return j
         return None
 
-    def updateAttributes(self, token, tokenType, fsDict, fsList):
+    def updateAttributes(self, token: str, tokenType: str, fsDict: dict, fsList: str) -> None:
         self.fsList = fsList
         self.lex = token
         self.type = tokenType
@@ -276,16 +276,16 @@ class Node_vandan():
         self.assignName()
         # self.updateDrel()
 
-    def assignName(self):
+    def assignName(self) -> None:
         if 'name' in self.__attributes:
             self.name = self.getAttribute('name')
         else:
             self.errors.append('No name for this token Node')
 
-    def printValue(self):
+    def printValue(self) -> str:
         return self.lex
 
-    def printSSFValue(self, prefix, allFeat):
+    def printSSFValue(self, prefix, allFeat: bool) -> str:
         returnValue = [prefix, self.printValue(), self.type]
         if not allFeat:
             fs = ['<fs']
@@ -358,26 +358,26 @@ class ChunkNode_vandan():
         self.tamUtf = None
         self.tamWx = None
 
-    def analyzeChunk(self):
+    def analyzeChunk(self) -> None:
         [chunkType, chunkFeatDict, chunkFSList] = getChunkFeats(self.header)
         self.fsList = chunkFSList
         self.type = chunkType
         self.updateAttributes(chunkFeatDict)
         self.text = '\n'.join([line for line in self.text])
 
-    def updateAttributes(self, fsDict):
+    def updateAttributes(self, fsDict: dict) -> None:
         for attribute in fsDict.keys():
             self.__attributes[attribute] = fsDict[attribute]
         self.assignName()
         self.updateDrel()
 
-    def assignName(self):
+    def assignName(self) -> None:
         if self.__attributes.has_key('name'):
             self.name = self.getAttribute('name')
         else:
             self.errors.append('No name for this chunk Node')
 
-    def updateDrel(self):
+    def updateDrel(self) -> None:
         if 'drel' in self.__attributes:
             drelList = self.getAttribute('drel').split(':')
             if len(drelList) == 2:
@@ -389,13 +389,13 @@ class ChunkNode_vandan():
                 self.parent = drelList[1]
                 self.parentRelation = self.getAttribute('dmrel').split(':')[0]
 
-    def printValue(self):
+    def printValue(self) -> str:
         returnString = []
         for node in self.nodeList:
             returnString.append(node.printValue())
         return ' '.join(x for x in returnString)
 
-    def printSSFValue(self, prefix, allFeat, nodePosn):
+    def printSSFValue(self, prefix, allFeat: bool, nodePosn: int) -> tuple[list[str], int]:
         returnStringList = []
         for node in self.nodeList:
             nodePosn += 1
@@ -452,7 +452,7 @@ class Sentence():
             self.text = sentence.group('text')
             self.analyzeSentence()
 
-    def analyzeSentence(self, ignoreErrors=False, nesting=True):
+    def analyzeSentence(self, ignoreErrors: bool = False, nesting: bool = True):
         lastContext = self
         lastContext_ex = self
         currentChunkNode = None
@@ -525,7 +525,7 @@ class Sentence():
                         i.parent = self.find_dependency_parent_node(
                             lastContext.nodeList, d_temp[1]).upper.name
 
-    def find_dependency_parent_node(self, nodeList, name):
+    def find_dependency_parent_node(self, nodeList: list, name: str):
         for i in nodeList:
             for j in i.nodeList:
                 if j.getAttribute('name') == name:
